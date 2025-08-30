@@ -5,6 +5,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.math.RoundingMode;
+import java.util.Comparator;
+import java.time.Period;
+import java.util.Collections;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
 
 public class Principal {
 
@@ -42,14 +48,54 @@ public class Principal {
         // 3.6 – Imprimir os funcionários agrupados por função
         // Não conheço o método MAP, vou prosseguir alguns estudos a respeito
         
+        // 3.7 - Não existe
 
-        // 3.7 - Imprimir funcionários que fazem aniversário no mês 10 e 12
+        // 3.8 - Imprimir funcionários que fazem aniversário no mês 10 e 12
         List<Funcionario> aniversariooutedec = funcionarios.stream() 
             .filter (f -> f.getDataNascimento().getMonthValue() == 10 || f.getDataNascimento().getMonthValue() == 12)
             .collect(Collectors.toList());
 
         System.out.println("\n- Aniversariantes de Outubro e Dezembro -");
         imprimirFuncionarios(aniversariooutedec);
+
+        // 3.9 - Imprimir funcionário com a maior idade
+        Funcionario maioridade = funcionarios.stream()
+                .min(Comparator.comparing(Funcionario::getDataNascimento))
+                .orElse(null);
+        if (maioridade != null) {
+            int idade = Period.between(maioridade.getDataNascimento(), LocalDate.now()).getYears();
+        
+            System.out.println("\nFuncionário mais velho: " + maioridade.getNome() + " | Idade: " + idade + " anos");
+        }
+
+        // 3.10 - Ordenar funcionários por ordem alfabética
+        System.out.println("\n- Funcionários em ordem alfabética -");
+        List<Funcionario> ordemalfabetica = new ArrayList<>(funcionarios);
+        ordemalfabetica.sort(Comparator.comparing(f -> f.getNome()));
+        imprimirFuncionarios(ordemalfabetica);
+
+        // 3.11 - Somar todos os salários
+        BigDecimal valorTotal = funcionarios.stream()
+            .map(Funcionario::getSalario)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+
+        System.out.println("\nTotal dos salários: R$ " + df.format(valorTotal));
+
+        // 3.12 - Somar todos os salários
+        BigDecimal SALARIO_MINIMO = new BigDecimal("1212.00");
+        DecimalFormat dfSemDecimal = new DecimalFormat("#,##0");
+
+        System.out.println("\n- Salários mínimos por funcionário -");
+        funcionarios.forEach(f -> {
+            BigDecimal qtd = f.getSalario().divide(SALARIO_MINIMO, 0, RoundingMode.HALF_DOWN);
+            if (qtd.intValue() == 1) {
+                System.out.println("Nome:" + f.getNome() + " | Quantidade: " + dfSemDecimal.format(qtd) + " salário mínimo");
+            } else {
+                System.out.println("Nome:" + f.getNome() + " | Quantidade: " + dfSemDecimal.format(qtd) + " salários mínimos");
+            }
+        });
 
     }
 
